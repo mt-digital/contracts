@@ -20,14 +20,18 @@ def removeNonAscii(s): return "".join( i for i in s if ord(i)<128 )
 # just take dollar vals, date, and description
 url_root = 'http://www.defense.gov/contracts/contract.aspx?contractid='
 # 5171: November 22, 2013
-valid_suffixes = [ str( valid_num ) for valid_num in range(391, 5172) ]
+#valid_suffixes = [ str( valid_num ) for valid_num in range(391, 5172) ]
+# this one starts Jan 2011
+#valid_suffixes = [ str( valid_num ) for valid_num in range(4441, 5172) ]
+# Jan 2001 - Dec 2003
+valid_suffixes = [ str( valid_num ) for valid_num in range(1926, 2668) ]
 
-write_file = open( 'data/dod_contracts_ts_full.csv', 'w' )
+write_file = open( 'data/dod_contracts_ts_2011_2013.csv', 'w' )
 # initialize columns of csv file
 write_file.write('Date,Dollar Amount,Full Description\n')
 
-#for suffix in valid_suffixes:
-for suffix in valid_suffixes[-10:-8]:
+for suffix in valid_suffixes:
+#for suffix in valid_suffixes[-10:-8]:
     # open the next day's contracts page
     page = urlopen( url_root + suffix )
     html = page.read()
@@ -39,7 +43,7 @@ for suffix in valid_suffixes[-10:-8]:
                          .getText()
                          .split(' ')[-3:] #.encode( 'utf-8' )
                      ).replace(',', '')
-                         
+    print "grabbing data for " + date                         
 
     # iterate over p elements, find the ones with dollar values--these are
     #  also the ones with actual records, not other filler
@@ -47,9 +51,10 @@ for suffix in valid_suffixes[-10:-8]:
 
 	    dollar_split = p.split('$') 
 
+	    # take only the dollar amount, remove commas, and convert to float
 	    if len( dollar_split ) > 1:
-	    	# take only the dollar amount, remove commas, and convert to float
-	        dollar_amt = float( dollar_split[1].split(' ')[0].replace(',', '') )
+	    	
+	    	dollar_amt = dollar_split[1].split(' ')[0].replace(',', '')
             # append to file
 	    	write_file.write( u','.join( [
                 date.encode('utf-8'), str(dollar_amt), removeNonAscii(p)
@@ -57,4 +62,6 @@ for suffix in valid_suffixes[-10:-8]:
 				#p.encode('utf-8')
 	    	    ]) + '\n'
 	    	)
+
+write_file.close()
 	    	    
