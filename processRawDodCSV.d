@@ -1,30 +1,45 @@
-import std.datetime;
-import std.stdio;
-import std.string;
-version(run)
-{
+/**
+ * Functions for processing the raw csv files gotten through scraping of the
+ * DoD site http://www.defense.gov/contracts/, built using python script 
+ * dod_contracts_ts.py
+ */
+module processRawDodCSV;
+
+
+import std.conv : to;
+import std.datetime : Month, DateTime, SysTime, UTC;
+import std.math : approxEqual;
+import std.string : split, toLower;
+
+/**
+ * Convert the 'word dates' found in the 'Date' column of the raw csv to 
+ * unix time epochs for use with Rickshaw/d3
+ */
+
 void main()
 {
-	Clock C;
-    writeln("yeah");
-    writeln("standard time: ", C.currStdTime,", unix time: ", C.currTime);
 
-    writeln("standard time converted to 'unix time', supposedly in seconds after"
-        "1970: ", stdTimeToUnixTime(C.currStdTime) );
-
-    // got to try to convert some shit
-    // from docs: "opCall(); UTC is a singleton class. UTC returns its only instance.
-    auto dt = SysTime( DateTime(1970, 1, 1), UTC() );
-    assert( dt.toUnixTime == 0 );
-    writeln( dt.toUnixTime );
-
-    auto dt2 = SysTime( DateTime(1970, getMonth( "JANuary" ), 1), UTC() );
-    assert (dt2.toUnixTime == 0);
-
-    // will have to write a large switch to make a mapping for months
-}
 }
 
+double wordDateToEpoch(string wordDate)
+{
+    string[] spl = wordDate.split(" ");
+    return SysTime( 
+        DateTime(spl[2].to!uint, spl[0].getMonth, spl[1].to!uint)
+        ).toUnixTime;
+}
+unittest {
+	double nov10_2013 = SysTime( DateTime(2013, 11, 10), UTC() ).toUnixTime;
+    assert ( approxEqual(wordDateToEpoch("november 10 2013"), nov10_2013));
+
+    double apr01_1970 = SysTime( DateTime(1970, 4,  1), UTC() ).toUnixTime;
+    assert ( approxEqual(wordDateToEpoch("April 01 1970"), apr01_1970));
+}
+
+/**
+ * Convert a 'word month', e.g. February, to its representative Month enum
+ * member from std.datetime.
+ */
 ubyte getMonth( string monthWord )
 {
     switch (monthWord.toLower) {
@@ -66,3 +81,9 @@ unittest {
     assert(getMonth("December")  ==  Month.dec);
 }
 
+struct RawContractAnnouncement
+{
+    string date;
+    double dollarAmt;
+    string fullDescription;
+}
