@@ -4,10 +4,20 @@ contracts
 Tools and data for exploring US Federal Government contracts
 
 Log
----
+===
+12/20/13
+--------
+Success with histogram of top five companies 2001-2003. Next up, build a 
+timeseries plot for each of these five. Color code using the color brewer as
+developed in `workspace/rnd/vis_lixo`. The next touches will be pie chart to
+compare those five to the rest of the total contracts for that period, plus
+color-coding everything consistently between plots. Around the same time, start
+making copy for this and preparing to merge in as the first blog post! It would
+be great to also write a "how I did it" blog post.
 
-12/13/12
-********
+
+12/13/13
+--------
 Revisiting after a little break. Have some functions to get the 
 month and date epoch, which will be useful for web viz. My plan for 
 processing the 'raw' csv is to have a 'process CSV' function, which will

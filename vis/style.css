@@ -1,0 +1,34 @@
+.bar {
+  fill: dodgerblue;
+}
+
+.bar:hover {
+  fill: darkorange;
+}
+
+.axis {
+  font: 16px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.axis text {
+	font-size: 20px
+}
+
+.y.axis path {
+  display: none;
+}
+
+.x.label {
+    font:20px sans-serif;
+    font-weight:bold;
+}
+.y.label {
+    font:20px sans-serif;
+    font-weight:bold;
+}
