@@ -7,7 +7,7 @@ var margin = {top: 100, right: 120, bottom: 200, left: 220},
     height = 700 - margin.top - margin.bottom;
 
 var y = d3.scale.ordinal()
-    .rangeRoundBands([0, height], .1);
+    .rangeRoundBands([0, height], 0.1);
 
 var x = d3.scale.linear()
     .range([height, 0]);
@@ -27,7 +27,7 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("data.csv", function(error, data) {
+d3.csv("p1_hist_data.csv", function(error, data) {
 
   y.domain(data.map(function(d) { return d.contractor; }));
   x.domain([d3.max(data, function(d) { return parseFloat(d.total); }), 0]);
@@ -36,7 +36,7 @@ d3.csv("data.csv", function(error, data) {
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis)
-      .selectAll("text")
+      .selectAll("text");
 
   svg.append("text")
       .attr("class", "x label")
@@ -47,14 +47,12 @@ d3.csv("data.csv", function(error, data) {
 
   svg.append("g")
       .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
+      .call(yAxis);
+  svg.append("text")
       .attr("class", "y label")
-      .attr("y", 0)
+      .attr("y", -margin.top*0.15)
       .attr("x", 0)
       .attr("text-anchor", "end")
-      .attr("dy", ".71em")
-      .attr("dx", ".71em")
       .text("Contractor");
 
   svg.selectAll(".bar")
@@ -63,7 +61,6 @@ d3.csv("data.csv", function(error, data) {
       .attr("class", "bar")
       .attr("y", function(d) { return y(d.contractor); })
       .attr("height", y.rangeBand())
-      //.attr("x", function(d) { return x(d.total); })
       .attr("x", 0)
       .attr("width", function(d) { return x(d.total); });
 });
