@@ -15,6 +15,14 @@ color-coding everything consistently between plots. Around the same time, start
 making copy for this and preparing to merge in as the first blog post! It would
 be great to also write a "how I did it" blog post.
 
+*Technical progress:*
+Need to parse the processed csv, `data/proc/*2001-2003.csv`, to be just the
+top five. Look through manually to see variations on the top five names and
+manually (i.e. via unique rules) normalize so, e.g., all variations on Lockheed
+Martin (Lockheed-Martin, Lockheed Martin Fire Saftey, etc.) all map to 
+Lockheed Martin. For starters, just get the timeseries with only exact matches
+to the already-extracted names (as in `vis/data/p1_hist_data.csv`).
+
 
 12/13/13
 --------

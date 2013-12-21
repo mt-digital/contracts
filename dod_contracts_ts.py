@@ -58,8 +58,6 @@ for suffix in valid_suffixes:
             # append to file
 	    	write_file.write( u','.join( [
                 date.encode('utf-8'), str(dollar_amt), removeNonAscii(p)
-                #p.encode('utf-8')#.decode('ascii','ignore')#.decode('utf-8') 
-				#p.encode('utf-8')
 	    	    ]) + '\n'
 	    	)
 

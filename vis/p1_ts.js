@@ -42,5 +42,19 @@ var stack = d3.layout.stack()
                 .values( function(d) { return d.values; } );
 
 // load data, insert into svg elements                    
+d3.csv("data/p1_ts_data.csv", function( row ) {
+
+/*
+ * Using d3's built in area chart requres that the date be the primary key and
+ * that, in this case, each company must have an equal number of dates.
+ *
+ * To do this, create a time range. Iterate over each company. If the company
+ * has an entry for a date in the time range, add this to the previous total.
+ * If not, make the next entry the previous total.
+ */
+
+
+
+});
 
             
