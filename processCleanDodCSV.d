@@ -125,9 +125,10 @@ double wordDateToEpoch(string wordDate)
 {
     string[] spl = wordDate.split(" ");
     return SysTime( 
-        DateTime(spl[2].to!uint, spl[0].getMonth, spl[1].to!uint),
-        UTC()
-        ).toUnixTime;
+                DateTime(spl[2].to!uint, spl[0].getMonth, spl[1].to!uint),
+                UTC()
+                )
+            .toUnixTime;
 }
 unittest {
 	double nov10_2013 = SysTime( DateTime(2013, 11, 10), UTC() ).toUnixTime;
