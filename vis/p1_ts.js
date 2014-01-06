@@ -14,13 +14,20 @@ var svg = d3.select("body").append("svg")
             .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+// append rectangle that spans plot area, taken from http://bl.ocks.org/mbostock/3892919
+svg.append("rect")
+    .attr("class", "background")
+    .attr({"width":width, "height":height});
+
 // establish/set y axis scale and range
 var y = d3.scale.linear()
             .range([height, 0]);
 
 var yAxis = d3.svg.axis()
             .scale(y)
-            .orient("left");
+            .orient("left")
+            // extend white(-on-grey) ticks for width of plot space
+            .tickSize(-width);
 
 // establish/set time axis scale and range
 var t = d3.time.scale()
@@ -29,8 +36,6 @@ var t = d3.time.scale()
 var tAxis = d3.svg.axis()
             .scale(t)
             .orient("bottom");
-
-//var parseDate = d3.time.
 
 // set up colors, areas, and the stack layout
 var color = d3.scale.category20();
@@ -72,8 +77,20 @@ d3.csv("data/p1_ts_data.csv", function(error, row ) {
     }));
 
     t.domain(d3.extent( contractors[0].values, function(d){ return d.day; } ));
-    tAxis.ticks(10);
+    //tAxis.ticks(7);
+    tAxis.ticks(d3.time.month, 6);
+    tAxis.tickFormat(d3.time.format("%Y-%m"));
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(tAxis);
+
     y.domain( [0, 225000000000] );
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
     var contractor = svg.selectAll(".contractor")
             .data(contractors)
         .enter().append("g")
@@ -84,19 +101,11 @@ d3.csv("data/p1_ts_data.csv", function(error, row ) {
         .attr("d", function(d) { return area( d.values ); })
         .style("fill", function(d) { return color( d.name ); });
 
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(tAxis);
-
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
     
     var legendFontSize = 14; 
     // make legend
     svg.append("rect")
-        .attr("class", "legend")
+        .attr("class", "background")
         .attr("x", width + 0.1*margin.right)
         .attr("y", 0)
         .attr("width", margin.right*0.9)

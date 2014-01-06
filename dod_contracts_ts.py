@@ -24,9 +24,11 @@ url_root = 'http://www.defense.gov/contracts/contract.aspx?contractid='
 # this one starts Jan 2011
 #valid_suffixes = [ str( valid_num ) for valid_num in range(4441, 5172) ]
 # Jan 2001 - Dec 2003
-valid_suffixes = [ str( valid_num ) for valid_num in range(1926, 2668) ]
+#valid_suffixes = [ str( valid_num ) for valid_num in range(1926, 2668) ]
 
-write_file = open( 'data/dod_contracts_ts_2011_2013.csv', 'w' )
+valid_suffixes = [ str( valid_num ) for valid_num in range(1188, 1925) ]
+
+write_file = open( 'data/dod_contracts_ts_1998_2000.csv', 'w' )
 # initialize columns of csv file
 write_file.write('Date,Dollar Amount,Full Description\n')
 

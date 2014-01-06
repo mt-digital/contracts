@@ -13,7 +13,8 @@
 .axis path,
 .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #fff;
+  stroke-width: 4px;
   shape-rendering: crispEdges;
 }
 .axis text {
@@ -35,4 +36,9 @@
 .legend.text {
     font:14px sans-serif;
     font-weight:bold;
+}
+
+/* 'rect' element fill for gg-style y axis, taken from http://bl.ocks.org/mbostock/3892919 */
+.background {
+    fill: #ddd;
 }
