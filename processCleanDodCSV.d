@@ -90,16 +90,40 @@ void processCleanFile(string inputPath, string outputPath)
 
 }
 
+const string toISODate(const string dateStr)
+{
+    // split date string into word month, day, and year
+    string[] parts = dateStr.split(" ");
+
+    const ubyte monthNum = parts[0].getMonth;
+
+    string month = monthNum < 10 
+                    ? "0" ~ monthNum.to!string 
+                    : monthNum.to!string;
+
+    const uint dayNum = parts[1].to!uint;
+
+    string day = dayNum < 10 ? "0" ~ parts[1] : parts[1];
+
+    string isoDate = [ parts[2], month, day ].join("-");
+
+    return isoDate; 
+}
+unittest
+{
+    const string d = "December 5 2010";
+    assert (d.toISODate == "2010-12-05"); 
+}
+
 string processAnnouncement(RawContractAnnouncement ra)
 {
-	//writeln("processing announcement from ", ra.date);
 	string fd;
 
-    return [ format("%.8f", ra.date.wordDateToEpoch), // unix-time epoch
+    return [ ra.date.toISODate, // wordDateToEpoch), // unix-time epoch
 
                 ra.dollarAmount // contract value
                   .removechars(letters)
-                  .removechars("/--;).*")
+                  .removechars("/--;).,*")
                   ~ ".0",                
 
                 ra.fullDescription.removechars(";") // company name
@@ -112,22 +136,24 @@ string processAnnouncement(RawContractAnnouncement ra)
                   .findSplitBefore("LLC")[0]
                   .findSplitBefore("Corporation")[0]
                   .findSplitBefore("Company")[0]
+                  .strip
             ]
          .join(",");
 }
 unittest {
     RawContractAnnouncement ra;
     ra.date = "June 10 2011";
-    ra.dollarAmount = "1000000000.0000900"; //1_000_000.00009000001;	
+    ra.dollarAmount = "1000000000.000,0900"; //1_000_000.00009000001;	
 
     assertThrown!RangeError(ra.processAnnouncement);
 
     ra.fullDescription = "The Boeing Corp. has been granted a new contract...";
 
-    const string dateStr = "2011-07-10"; // ISO 8601
-    const string dollarStr = "1000000.00009000";
+    const string dateStr = "2011-06-10"; // ISO 8601
+    const string dollarStr = "10000000000000900.0";
     const string procStr = dateStr ~ "," ~ dollarStr ~ ",Boeing";
 
+    assert ( procStr == ra.processAnnouncement );
 }
 
 double wordDateToEpoch(string wordDate)
