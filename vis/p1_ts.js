@@ -109,8 +109,7 @@ d3.csv("data/p1_ts_data.csv", function(error, row ) {
         .attr("x", width + 0.1*margin.right)
         .attr("y", 0)
         .attr("width", margin.right*0.9)
-        .attr("height", contractors.length*(legendFontSize+2)+7)
-        .attr("fill", "darkgray");
+        .attr("height", contractors.length*(legendFontSize+2)+7);
     
     svg.selectAll(".legend text")
         .data(color.domain())

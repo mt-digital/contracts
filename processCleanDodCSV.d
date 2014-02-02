@@ -5,6 +5,8 @@
  */
 module processCleanDodCSV;
 
+import core.exception : RangeError;
+
 
 import std.algorithm : canFind, equal, filter, findSplitBefore, findSplitAfter,
     map, reduce;
@@ -13,7 +15,7 @@ import std.ascii : letters;
 import std.conv : to;
 import std.csv : csvReader;
 import std.datetime : Month, DateTime, SysTime, UTC;
-import std.exception : enforce;
+import std.exception : assertThrown, enforce;
 import std.getopt;
 import std.math : approxEqual;
 import std.range : chunks, drop, take;
@@ -26,6 +28,8 @@ import std.stdio;
  */
 void main(string[] args)
 {
+version(main)
+{
     string inputFile, outputFile;
     bool cleanFirst;
     getopt( args,
@@ -35,7 +39,7 @@ void main(string[] args)
 
     processCleanFile(inputFile, outputFile);
 }
-
+}
 /**
  * Process a cleaned file that's been cleaned by cleanRawDodCSV.d
  */
@@ -73,6 +77,11 @@ void processCleanFile(string inputPath, string outputPath)
         	continue;
         }
 
+        catch(std.conv.Exception) {
+            exceptions++;
+            continue;
+        }
+
         lines++;
     }
 
@@ -83,17 +92,16 @@ void processCleanFile(string inputPath, string outputPath)
 
 string processAnnouncement(RawContractAnnouncement ra)
 {
-	writeln(ra.date);
+	//writeln("processing announcement from ", ra.date);
 	string fd;
-	//if (canFind(ra.fullDescription.split(" "), "The"))
-		//fd = ra.fullDescription.split("The ")[1 .. $].join(" ");
-
 
     return [ format("%.8f", ra.date.wordDateToEpoch), // unix-time epoch
-                ra.dollarAmount
+
+                ra.dollarAmount // contract value
                   .removechars(letters)
                   .removechars("/--;).*")
-                  ~ ".0",                // contract value
+                  ~ ".0",                
+
                 ra.fullDescription.removechars(";") // company name
                   .split(",")[0]
                   .findSplitAfter("The ")[1]
@@ -111,14 +119,15 @@ unittest {
     RawContractAnnouncement ra;
     ra.date = "June 10 2011";
     ra.dollarAmount = "1000000000.0000900"; //1_000_000.00009000001;	
-    const string dateStr = SysTime( DateTime(2011, 6, 10), UTC() ).toUnixTime.to!string
-                            ~ ".00000000";
+
+    assertThrown!RangeError(ra.processAnnouncement);
+
+    ra.fullDescription = "The Boeing Corp. has been granted a new contract...";
+
+    const string dateStr = "2011-07-10"; // ISO 8601
     const string dollarStr = "1000000.00009000";
-    const string procStr = dateStr ~ "," ~ dollarStr;
-    assert ( equal( ra.processAnnouncement, procStr ), "Processed announcement: "
-        ~ ra.processAnnouncement ~ "\nnot equivalent to manual proc string: "
-        ~ procStr
-    );
+    const string procStr = dateStr ~ "," ~ dollarStr ~ ",Boeing";
+
 }
 
 double wordDateToEpoch(string wordDate)

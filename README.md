@@ -5,6 +5,26 @@ Tools and data for exploring US Federal Government contracts
 
 Log
 ===
+2/1/14
+------
+On re-running the processCleanDodCSV.d script, made with `make process_clean_csv`,
+I found that it works fine and creates the data with the Unix date, contract
+amount, and the contractor name. I originally chose using the Unix date because
+Rickshaw.js used that. But since I'm rolling my own, that is unnecessary. The
+immediate step then is to just output an ISO 8061 Date: "YYYY-MM-DD". Then 
+using javascript the syntax for loading into D3 is (along with parsing the
+contract amount, a double):
+
+```js
+parseDate = d3.time.format("%Y-%m-%d").parse;
+data.forEach( 
+    function(d,i){ 
+            d.Date = parseDate(d.Date); 
+            d.Amount = +Amount;
+    }
+);
+```
+
 12/20/13
 --------
 Success with histogram of top five companies 2001-2003. Next up, build a 

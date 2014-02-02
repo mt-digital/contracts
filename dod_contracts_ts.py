@@ -25,10 +25,14 @@ url_root = 'http://www.defense.gov/contracts/contract.aspx?contractid='
 #valid_suffixes = [ str( valid_num ) for valid_num in range(4441, 5172) ]
 # Jan 2001 - Dec 2003
 #valid_suffixes = [ str( valid_num ) for valid_num in range(1926, 2668) ]
+# Jan 1998 - Dec 2000
+#valid_suffixes = [ str( valid_num ) for valid_num in range(1188, 1925) ]
+# Jan 2004 - Jan 2008
+#valid_suffixes = [ str( valid_num ) for valid_num in range(4575, 5210) ]
+# Oct 1994 - Dec 1997
+valid_suffixes = [ str( valid_num ) for valid_num in range(391, 1187) ]
 
-valid_suffixes = [ str( valid_num ) for valid_num in range(1188, 1925) ]
-
-write_file = open( 'data/dod_contracts_ts_1998_2000.csv', 'w' )
+write_file = open( 'data/dod_contracts_ts_Oct04-1994_1997.csv', 'w' )
 # initialize columns of csv file
 write_file.write('Date,Dollar Amount,Full Description\n')
 
@@ -44,7 +48,7 @@ for suffix in valid_suffixes:
     date = ' '.join( soup.title
                          .getText()
                          .split(' ')[-3:] #.encode( 'utf-8' )
-                     ).replace(',', '')
+                     ).replace(',', '').replace('\n','').replace('\r','')
     print "grabbing data for " + date                         
 
     # iterate over p elements, find the ones with dollar values--these are
@@ -56,10 +60,15 @@ for suffix in valid_suffixes:
 	    # take only the dollar amount, remove commas, and convert to float
 	    if len( dollar_split ) > 1:
 	    	
-	    	dollar_amt = dollar_split[1].split(' ')[0].replace(',', '')
+	    	dollar_amt = dollar_split[1].split(' ')[0] \
+	    	                            .replace(',', '') \
+	    	                            .replace('\n', '') \
+	    	                            .replace('\r', '')
+
             # append to file
 	    	write_file.write( u','.join( [
-                date.encode('utf-8'), str(dollar_amt), removeNonAscii(p)
+                date.encode('utf-8'), str(dollar_amt), 
+                    removeNonAscii(p).replace('\n','').replace('\r','')
 	    	    ]) + '\n'
 	    	)
 
