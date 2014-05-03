@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# I don't know how I made it, but this will make the "all_quoted_desc.csv" file
+# into a three-column csv: Date | Dollar Amount | Full Description.
+#
+# Usage: 
+# bin/clean_all_quoted all_quoted_desc.csv
+
+all_quoted_file=$1
+three_col_out=$2
+
+sed 's/\",//g' $all_quoted_file > all_three_col_tmp.csv
+
+cut -d"," -f1-3 all_three_col_tmp.csv | sed 's/Co\.//' | \
+    sed "s/The\s*//" | sed "s/Corp\.//" | \
+    sed 's/Inc\.//' | sed 's/Lockheed Martin.*/Lockheed Martin/' | \
+    sed 's/\.//' | sed 's/\*//' | sed 's/Raytheon.*/Raytheon/' | \
+    sed 's/Bell.*/Bell/' | sed 's/General Dynamics.*/General Dynamics/' | \
+    sed 's/\"//g' \
+    > $three_col_out
