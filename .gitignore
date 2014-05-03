@@ -34,4 +34,13 @@ nosetests.xml
 .project
 .pydevproject
 
-.csv
+*.csv
+
+# R
+*.RData
+*.Rhistory
+
+*.bak
+
+# vim swapfiles
+*.swp
