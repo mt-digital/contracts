@@ -3,6 +3,45 @@ contracts
 
 Tools and data for exploring US Federal Government contracts
 
+Latest
+======
+5/2/14
+------
+
+Here's the current setup. Me in the past made a file called
+`data/proc/all_quoted.csv`. Sadly I don't exactly remember how. The original 
+file is now `data/proc/all_quoted_desc.csv.bak` because I did the `sed` on it
+that's found in a brand-new file, `bin/clean_all_quoted`. What this does is
+more than clean, actually, maybe needs a name change. It does clean the data,
+then pass the cleaned version along to a bunch of sed commands that clean 
+and process. 
+
+The final product of this is a csv file, currently I called it
+`data/proc/dateAmtCompany.csv`, but you can make a new one like so:
+
+```bash
+bin/clean_all_quoted data/proc/all_quoted_desc.csv data/proc/dateAmtCompany.csv
+```
+
+Then you'll have a nice csv file with the date of a contract, the amount of the
+contract, and the contractor:
+
+```
+date | amount | contractor
+```
+
+But they aren't called that.
+
+Then I have written one R script to do a simple yet powerful operation:
+aggregate the company totals. Do this like so:
+
+```bash
+Rscript R/aggCompanies.R data/proc/dateAmtCompany.csv \
+    data/proc/company_totals.csv 
+```
+
+Now take this and make a pie, bar, or donut chart! mmm.... donuts....
+
 Log
 ===
 2/1/14
