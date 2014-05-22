@@ -15,8 +15,7 @@ what the time frame is for this, but a good start. Saved in `copy/figuresi/top_1
 
 To create this I did:
 
-```r
-
+```R
 df <- read.csv('data/proc/company_totals.csv')
 
 top10 <- head(df, 10) # already ordered
