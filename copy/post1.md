@@ -2,8 +2,8 @@
 
 ---
 
-Top DoD contract recipients 2001-2003: the tip of the iceberg
--------------------------------------------------------------
+# Top DoD contract recipients 2001-2003: the tip of the iceberg
+
 Ever since my first encounter with In-Q-Tel (CIA's venture capital arm) 
 representatives interested in investing in my adviser's copmany, and with a
 mathematician from Lockheed Martin who told me and my Chinese national 

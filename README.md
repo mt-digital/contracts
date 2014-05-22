@@ -5,6 +5,37 @@ Tools and data for exploring US Federal Government contracts
 
 Latest
 ======
+
+## 5/22/14
+
+Plotted the "top 10 welfare recipients" of the United States. Not sure even 
+what the time frame is for this, but a good start. Saved in `copy/figuresi/top_10_welfare.png`.
+
+![welfare](copy/figures/top_10_welfare.png "welfare mamas")
+
+To create this I did:
+
+```R
+df <- read.csv('data/proc/company_totals.csv')
+
+top10 <- head(df, 10) # already ordered
+# to plot largest first, must reverse. We'll also convert to billions
+top10 <- 
+    data.frame( company=rev(top10$company), amt_bil=rev(top10$amount/1e9) )
+
+png(filename="copy/figures/top_10_welfare.png", height=500, width=900)
+
+par(las=1, mar=c(5,18,4,2))
+
+barplot(top10$amt_bil, 
+        main="top US welfare recipients", 
+        horiz=TRUE, 
+        names.arg=top10$company, 
+        xlab="Billions of US Dollars")
+
+dev.off() # close png connection
+```
+
 5/2/14
 ------
 
