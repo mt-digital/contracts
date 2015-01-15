@@ -171,3 +171,26 @@ def count_by_activity(contract_json):
     activities = by_activity.keys()
 
     return dict(zip(activities, [len(by_activity[a]) for a in activities]))
+
+def make_contract_row(contract_json):
+    """
+
+    """
+
+    return ContractRow()
+
+
+class ContractRow(object):
+    """
+    Contract row contains the following fields, a container for the information
+    gleaned from a contract announcement.
+    """
+    def __init__(self, arg):
+        self.arg = arg
+
+    def as_string(self):
+        """
+        Return a comma-separated string of the extracted fields of the contract
+        from the contract announcement.
+        """
+        pass
