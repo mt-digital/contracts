@@ -26,7 +26,7 @@ provide functionality for downloading raw html pages for each day of contract
 announcements and a function for extracting the announcements from the html
 into a JSON string, one for each day. The resulting JSON looks like this:
 
-```
+```json
 {
     "date": "December 19, 2014",
     "contracts": 
