@@ -1,7 +1,7 @@
 contracts
 =========
 
-Tools and data for exploring US Federal Government contracts
+Tools and data for exploring US Federal Government contracts. See below for instructions on downloading and processing daily contract announcements from [defense.gov](www.defense.gov). Also see the `download_fpds.py` for downloading a different format where you can get any of the Federal Government's Bureau, for example the USDA, the Department of the Interior, the Kennedy Center, and more. This data comes from [Federal Procurement Data System (FPDS)](https://www.fpds.gov/fpdsng_cms/index.php/en/)
 
 what it is
 ==========
