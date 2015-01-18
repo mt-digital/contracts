@@ -3,145 +3,97 @@ contracts
 
 Tools and data for exploring US Federal Government contracts
 
-Latest
-======
+what it is
+==========
 
-I've done more since this!
+I want to show how much money comes to defense companies every day and highlight
+the perpetual "winners" in this system. I'll do this by parsing the [daily
+contract announcements](http://www.defense.gov/contracts/) from the 
+Department of Defense website. This isn't about whether or not we should be
+carrying out particular missions or even if we spend too much on defense. 
+Instead, this is to show the scale at which individual corporations profit from
+what is in many cases public-funded high-tech research. 
 
-## 5/22/14
+More and more, it seems
+that the public should be reimbursed for its high-risk investment just like
+the angel investors of Silicon Valley.
 
-Plotted the "top 10 welfare recipients" of the United States. Not sure even 
-what the time frame is for this, but a good start. Saved in `copy/figuresi/top_10_welfare.png`.
+how to use it
+=============
 
-![welfare](copy/figures/top_10_welfare.png "welfare mamas")
+In this short example I show the current working functionality. So far we 
+provide functionality for downloading raw html pages for each day of contract
+announcements and a function for extracting the announcements from the html
+into a JSON string, one for each day. The resulting JSON looks like this:
 
-To create this I did:
-
-```R
-df <- read.csv('data/proc/company_totals.csv')
-
-top10 <- head(df, 10) # already ordered
-# to plot largest first, must reverse. We'll also convert to billions
-top10 <- 
-    data.frame( company=rev(top10$company), amt_bil=rev(top10$amount/1e9) )
-
-png(filename="copy/figures/top_10_welfare.png", height=500, width=900)
-
-par(las=1, mar=c(5,18,4,2))
-
-barplot(top10$amt_bil, 
-        main="top US welfare recipients", 
-        horiz=TRUE, 
-        names.arg=top10$company, 
-        xlab="Billions of US Dollars")
-
-dev.off() # close png connection
+```
+{
+    "date": "December 19, 2014",
+    "contracts": 
+    {
+        "navy": [
+    "General Dynamics National Steel and
+     Shipbuilding Co., San Diego, California, is being awarded a $498,116,529
+    modification to a previously awarded fixed-price-incentive, firm-target contract
+    (N00024-09-C-2229) for the procurement of the detail, design and construction of the fourth Mobile Landing Platform Afloat Forward Staging Base. Work will be performed in: San Diego,
+    California (70 percent); Pittsburgh, Pennsylvania (7 percent); Chesapeake, Virginia (7
+    percent); Beloit, Wisconsin (6 percent); Iron Mountain, Michigan (2 percent); and various
+    locations in the United States (0.8 percent); work is expected to be completed by March 2018.
+    Fiscal 2014 shipbuilding and conversion (Navy) contract funds in the amount of
+    $498,116,529 will be obligated at time of award and will not expire at the end of the current
+    fiscal year. The Naval Sea Systems Command, Washington, District of Columbia, is the
+    contracting activity.",
+    
+    "The Boeing Co., Seattle, Washington, is being awarded a not-to-exceed ..."
 ```
 
-5/2/14
-------
+download contract announcement html
+-----------------------------------
 
-Here's the current setup. Me in the past made a file called
-`data/proc/all_quoted.csv`. Sadly I don't exactly remember how. The original 
-file is now `data/proc/all_quoted_desc.csv.bak` because I did the `sed` on it
-that's found in a brand-new file, `bin/clean_all_quoted`. What this does is
-more than clean, actually, maybe needs a name change. It does clean the data,
-then pass the cleaned version along to a bunch of sed commands that clean 
-and process. 
+You can go to an individual day's contract
+announcements, for example, by visiting a URL like this: 
+`http://www.defense.gov/Contracts/Contract.aspx?ContractID=391`. That happens
+to be the very first one available, October 7, 1994. The latest one as of
+this writing is January 16, 2015,
+`http://www.defense.gov/Contracts/Contract.aspx?ContractID=5460`. The function
 
-The final product of this is a csv file, currently I called it
-`data/proc/dateAmtCompany.csv`, but you can make a new one like so:
+
+```python
+# download about ten years of daily raw contract HTML announcements
+download_announcements(first_id=1842, last_id=5442):
+# do the same, but instead of default data/html dir, use custom
+download_announcements(first_id=1842, last_id=5442, save_dir="raw_html"):
+```
+
+convert raw html to JSON
+------------------------
+
+```python
+# create processed JSON saved to json from raw_html 
+# (defaults are data/html to data/json)
+make_agency_dicts
+```
+
+Finally at its simplest you could just run
+
+```python
+download_announcements()
+make_agency_dicts()
+```
+
+and you will download roughly ten years' worth of daily contract data, first
+the whole HTML page for each day to a day-coded `.html` file in `data/html` and
+then process those pages to be in the nicely-formatted JSON above, again one
+`.json` for every day, in `data/json`.
+
+unittests
+=========
+
+Run em with [nosetests](https://nose.readthedocs.org/en/latest/):
 
 ```bash
-bin/clean_all_quoted data/proc/all_quoted_desc.csv data/proc/dateAmtCompany.csv
+nosetests -v
 ```
 
-Then you'll have a nice csv file with the date of a contract, the amount of the
-contract, and the contractor:
-
-```
-date | amount | contractor
-```
-
-But they aren't called that.
-
-Then I have written one R script to do a simple yet powerful operation:
-aggregate the company totals. Do this like so:
-
-```bash
-Rscript R/aggCompanies.R data/proc/dateAmtCompany.csv \
-    data/proc/company_totals.csv 
-```
-
-Now take this and make a pie, bar, or donut chart! mmm.... donuts....
-
-Log
-===
-2/1/14
-------
-On re-running the processCleanDodCSV.d script, made with `make process_clean_csv`,
-I found that it works fine and creates the data with the Unix date, contract
-amount, and the contractor name. I originally chose using the Unix date because
-Rickshaw.js used that. But since I'm rolling my own, that is unnecessary. The
-immediate step then is to just output an ISO 8061 Date: "YYYY-MM-DD". Then 
-using javascript the syntax for loading into D3 is (along with parsing the
-contract amount, a double):
-
-```js
-parseDate = d3.time.format("%Y-%m-%d").parse;
-data.forEach( 
-    function(d,i){ 
-            d.Date = parseDate(d.Date); 
-            d.Amount = +Amount;
-    }
-);
-```
-
-12/20/13
---------
-Success with histogram of top five companies 2001-2003. Next up, build a 
-timeseries plot for each of these five. Color code using the color brewer as
-developed in `workspace/rnd/vis_lixo`. The next touches will be pie chart to
-compare those five to the rest of the total contracts for that period, plus
-color-coding everything consistently between plots. Around the same time, start
-making copy for this and preparing to merge in as the first blog post! It would
-be great to also write a "how I did it" blog post.
-
-*Technical progress:*
-Need to parse the processed csv, `data/proc/*2001-2003.csv`, to be just the
-top five. Look through manually to see variations on the top five names and
-manually (i.e. via unique rules) normalize so, e.g., all variations on Lockheed
-Martin (Lockheed-Martin, Lockheed Martin Fire Saftey, etc.) all map to 
-Lockheed Martin. For starters, just get the timeseries with only exact matches
-to the already-extracted names (as in `vis/data/p1_hist_data.csv`).
-
-
-12/13/13
---------
-Revisiting after a little break. Have some functions to get the 
-month and date epoch, which will be useful for web viz. My plan for 
-processing the 'raw' csv is to have a 'process CSV' function, which will
-process the CSV by-line, but with successive improvements, like scraping out
-the location, company name, contract code, and important bits of the 
-description like 'missile defense', 'fire control', or 'small arms training.'
-For processed data, scrap the full description. Keep it always in the raw files.
-The raw CSV come from scraping defense.gov contract announcements.
-
-For now, extract the epoch date and the company name. The functionality for
-transforming a date like 'December 12, 2013' to an Unix-time epoch is written
-with unittests. To extract the company name, split and take the first element
-on `','`. 
-
-But following agile/lean principles means getting one thing working first.
-So, I also need to write the functionality to transform the raw file to just
-epoch-coded date and amount. This is the first product. Second product is a 
-processed file with the amount, the company name, and the date.
-
-Then, I want to make a plot with Vincent that makes a stacked timeseries plot,
-a stacked timeseries difference plot, and also an 'acceleration' plot. Compare
-the acceleration of dollars spent to something mechanical and military, 
-like the acceleration of an F-15, a Humvee, or something else.
-
-Also it'd be interesting to do some relative variance analysis, or other stats
-with R.
-
+I much prefer the verbose mode. Why even write tests if you don't look at what
+they're doing?

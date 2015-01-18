@@ -16,24 +16,25 @@ Definitions:
 #
 # contracts start at number 391 (October 07, 1994)
 #
+import fuzzywuzzy as fuzz
 import os
-import re
 
-from urllib2 import urlopen
 from bs4 import BeautifulSoup
 from collections import defaultdict
+from datetime import datetime
 from json import dumps
 from joblib import Parallel, delayed
+from re import findall, compile
+from urllib2 import urlopen
 
 
-def download_announcements(first_id=1842, last_id=5442):
+def download_announcements(first_id=1842, last_id=5442, save_dir="data/html/"):
     """
     Download contract announcements for a range of contract IDs from
-    http://www.defense.gov/Contracts
+    http://www.defense.gov/Contracts.
     """
     url_root = 'http://www.defense.gov/contracts/contract.aspx?contractid='
 
-    save_dir = "data/html/"
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
 
@@ -118,8 +119,7 @@ def make_agency_dict(html_file, save_file=None):
     return contract_dict
 
 
-def make_agency_dicts(html_dir="data/html", output_json_dir="data/json",
-                      parallel=True):
+def make_agency_dicts(html_dir="data/html", output_json_dir="data/json"):
     """
     Use ``make_agency_dict`` to clean the html and save the json format to
     file, keyed by defense agency.
@@ -137,13 +137,10 @@ def make_agency_dicts(html_dir="data/html", output_json_dir="data/json",
     if output_json_dir[-1] != '/':
         output_json_dir += '/'
 
-    if parallel:
-        Parallel(n_jobs=8)(delayed(make_agency_dict)(f) for f in input_files)
-    else:
-        for file_ in input_files:
-            print file_
-            basename = os.path.basename(file_).split('.')[0] + '.json'
-            make_agency_dict(file_, output_json_dir + basename)
+    for file_ in input_files:
+        print file_
+        basename = os.path.basename(file_).split('.')[0] + '.json'
+        make_agency_dict(file_, output_json_dir + basename)
 
 
 def unzip_fgdc():
@@ -172,12 +169,79 @@ def count_by_activity(contract_json):
 
     return dict(zip(activities, [len(by_activity[a]) for a in activities]))
 
-def make_contract_row(contract_json):
-    """
 
+def make_contract_jsons(contract_blob, date, division):
     """
+    parse a day's worth of contracts in JSON format to be a list of
+    dictionaries where every single contract announcement (blob) is parsed and
+    made into a row of a dataframe.
 
-    return ContractRow()
+    Returns: Array (most will be len 1) of parsed-out json strings.
+    """
+    # parse in to sentences. first sentence is the company announcement.
+    # split on ';' because sometimes have mult companies sep'd by ';'.
+    # if multiple, create multiple contract_json. handle multiple
+
+    # dollar amounts
+
+    # percentage per company
+
+    #
+
+    contract_jsons = []
+
+    return [js for js in contract_jsons]
+
+##########################################
+# Helper functions for make_contract_row
+#
+#     Parameters: blob_lines
+#        A single announcement, a child of division, grandchild of date,
+#        assumed split into lines by sentence with nltk sent_tokenize.
+##########################################
+
+
+def _extract_company_roots(blob):
+    """
+    Find all companies and return a list of lists of their 'roots'.
+    For example, Lockheed Martin Aerospace, LTD would result in
+    ["Lockheed ", "Martin ", "Aerospace"]. Other things like lowering
+    all upper case and stripping will be done when we build the
+    normalized list of companies, so if we had "Lockheed Martin Fire
+    and Missile", we would match that to "Lockheed Martin Aerospace"
+    giving both a normalized name "Lockheed Martin"
+    """
+    assert isinstance(blob, basestring), \
+        "Error, must pass a string blob, not %s" % str(type(blob))
+
+    semicol_split = blob.split(';')
+    to_comma = [el.split(',')[0] for el in semicol_split]
+
+    get_company_roots = lambda x: findall("[A-Z][a-zA-Z.]*\s*", x.strip())
+
+    company_roots = map(get_company_roots, to_comma)
+
+    return company_roots
+
+
+#: Regex to extract, e.g., $343,444,400 from a string
+find_dollars = \
+    lambda x: findall("\$[0-9]{1,3},[0-9]{1,3},[0-9]{1,3}[,0-9]*", x)
+
+#: Convert find_dollars-found string to integer
+doll_to_int = lambda x: int(x.replace('$', '').replace(',', ''))
+
+
+def _extract_amount(blob_lines):
+    "Extract dollar amounts from blob lines. If multiple, sum them"
+    assert type(blob_lines) is list
+
+    string_dollars = reduce(list.__add__, map(find_dollars, blob_lines))
+
+    total_dollars = reduce(int.__add__,
+                           [doll_to_int(sd) for sd in string_dollars])
+
+    return total_dollars
 
 
 class ContractRow(object):
@@ -185,12 +249,61 @@ class ContractRow(object):
     Contract row contains the following fields, a container for the information
     gleaned from a contract announcement.
     """
-    def __init__(self, arg):
-        self.arg = arg
+    def __init__(self, row_dict):
 
-    def as_string(self):
-        """
-        Return a comma-separated string of the extracted fields of the contract
-        from the contract announcement.
-        """
-        pass
+        assert row_dict.keys() == ["date", "division", "company",
+                                   "related_ids", "amount", "pct_shared"]
+
+        assert type(row_dict["date"]) is datetime
+        self.date = row_dict["date"]
+
+        self.division = row_dict["division"]
+        self.company = row_dict["company"]
+        self.related_ids = row_dict["related_ids"]
+        self.amount = row_dict["amount"]
+        self.pct_shared = row_dict["pct_shared"]
+
+
+def normalize_company_list(company_list):
+    """
+    transform the list of companies to be normalized, meaning companies with
+    important words in common be mapped to a common name when they match to
+    a high enough degree
+    """
+    strip_names = [n.strip().lower() for n in company_list]
+
+    cur_name = company_list[0].strip().lower()
+
+    for i, matching_name in enumerate(strip_names):
+
+        match_idxs = []
+
+        for j, next_name in enumerate(strip_names):
+
+            if fuzz.ratio(cur_name, next_name.strip().lower()) > 75:
+                match_idxs.append(j)
+
+        # can improve the make_normalized_name as necessary
+        company_list[match_idxs] =\
+            make_normalized_name(company_list[matched_idxs])
+
+    return company_list
+
+
+def make_normalized_name(matches):
+    """
+    Create a single normalized name for all the names for which a
+    match has been found.
+    """
+    # TODO make a smarter version of this
+    if len(matches[0]) == 1:
+        return matches[0]
+    else:
+        return ' '.join(matches[0], matches[1])
+
+
+def make_csv_contracts():
+    """
+    make a csv string representing the fully-processed JSONs.
+    """
+    pass
