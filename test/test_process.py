@@ -42,3 +42,15 @@ class TestContractsJson(object):
                     ["Cubic ", "Applications"],
                     ["Janus ", "Research ", "Group"]]
         assert generated == expected, "%s, %s" % (generated, expected)
+
+    def test_normalize_companies(self):
+        "Given a list of companies, properly normalize the company names"
+        assert False
+
+    def test_build_json(self):
+        "The entire, compnay-normalized JSON is successfully built"
+        assert False
+
+    def test_build_csv(self):
+        "The entire, compnay-normalized CSV is successfully built"
+        assert False

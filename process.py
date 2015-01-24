@@ -18,13 +18,12 @@ Definitions:
 #
 import fuzzywuzzy as fuzz
 import os
+import re
 
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from datetime import datetime
 from json import dumps
-from joblib import Parallel, delayed
-from re import findall, compile
 from urllib2 import urlopen
 
 
@@ -151,8 +150,10 @@ def unzip_fgdc():
     to_dir = "data/fgdc/"
     from_dir = "data/archive/"
 
+    expr = re.compile("20[01][0-9]")
+
     for file_ in os.listdir(from_dir):
-        full_to_dir = to_dir + re.findall("20[01][0-9]", file_)[0]
+        full_to_dir = to_dir + re.findall(expr, file_)[0]
         if not os.path.isdir(full_to_dir):
             os.makedirs(full_to_dir)
         os.popen("unzip " + from_dir + "'" + file_ + "'" +
@@ -217,7 +218,7 @@ def _extract_company_roots(blob):
     semicol_split = blob.split(';')
     to_comma = [el.split(',')[0] for el in semicol_split]
 
-    get_company_roots = lambda x: findall("[A-Z][a-zA-Z.]*\s*", x.strip())
+    get_company_roots = lambda x: re.findall("[A-Z][a-zA-Z.]*\s*", x.strip())
 
     company_roots = map(get_company_roots, to_comma)
 
@@ -226,7 +227,7 @@ def _extract_company_roots(blob):
 
 #: Regex to extract, e.g., $343,444,400 from a string
 find_dollars = \
-    lambda x: findall("\$[0-9]{1,3},[0-9]{1,3},[0-9]{1,3}[,0-9]*", x)
+    lambda x: re.findall("\$[0-9]{1,3},[0-9]{1,3},[0-9]{1,3}[,0-9]*", x)
 
 #: Convert find_dollars-found string to integer
 doll_to_int = lambda x: int(x.replace('$', '').replace(',', ''))
@@ -274,9 +275,8 @@ def normalize_company_list(company_list):
 
     cur_name = company_list[0].strip().lower()
 
+    match_idxs = []
     for i, matching_name in enumerate(strip_names):
-
-        match_idxs = []
 
         for j, next_name in enumerate(strip_names):
 
@@ -285,7 +285,7 @@ def normalize_company_list(company_list):
 
         # can improve the make_normalized_name as necessary
         company_list[match_idxs] =\
-            make_normalized_name(company_list[matched_idxs])
+            make_normalized_name(company_list[match_idxs])
 
     return company_list
 
@@ -295,7 +295,7 @@ def make_normalized_name(matches):
     Create a single normalized name for all the names for which a
     match has been found.
     """
-    # TODO make a smarter version of this
+    # TODO make a smarter version of this?
     if len(matches[0]) == 1:
         return matches[0]
     else:
