@@ -1,7 +1,8 @@
 """
 Testing module for the process module
 """
-from ..process import _extract_amount, _extract_company_roots
+from ..process import (_extract_amount, _extract_company_roots,
+                       normalize_company_list)
 
 from nltk import sent_tokenize
 
@@ -44,7 +45,23 @@ class TestContractsJson(object):
         assert generated == expected, "%s, %s" % (generated, expected)
 
     def test_normalize_companies(self):
-        "Given a list of companies, properly normalize the company names"
+        "Given a list of company 'roots', properly normalize the company names"
+        roots = [["Lockheed", "Martin", "YO"],
+                 ["Lockheed", "Martin", "Space", "Agency"],
+                 ["Boeing"],
+                 ["Caldera", "Explosives"],
+                 ["Explosive", "Vision"],
+                 ["Boeing", "Space"],
+                 ["Caldera", "Corporation"]]
+
+        expected_list_set = set(["Lockheed Martin",
+                                 "Boeing",
+                                 "Caldera",
+                                 "Boeing Space"])
+
+        assert normalize_company_list(roots) == expected_list_set,\
+            "%s, %s" % (normalize_company_list(roots), expected_list_set)
+
         assert False
 
     def test_build_json(self):
