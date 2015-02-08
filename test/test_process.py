@@ -54,13 +54,14 @@ class TestContractsJson(object):
                  ["Boeing", "Space"],
                  ["Caldera", "Corporation"]]
 
-        expected_list_set = set(["Lockheed Martin",
-                                 "Boeing",
-                                 "Caldera",
-                                 "Boeing Space"])
+        expected_list_set = ["lockheed martin",
+                             "boeing",
+                             "caldera explosives",
+                             "explosive vision",
+                             "boeing"]
 
         assert normalize_company_list(roots) == expected_list_set,\
-            "%s, %s" % (normalize_company_list(roots), expected_list_set)
+            "%s != %s" % (normalize_company_list(roots), expected_list_set)
 
         assert False
 

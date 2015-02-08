@@ -252,19 +252,38 @@ def normalize_company_list(company_list):
 
     cur_name = strip_names[0]
 
-    match_idxs = []
-    for i, matching_name in enumerate(strip_names):
-
-        for j, next_name in enumerate(strip_names):
-
-            if fuzz.ratio(cur_name, next_name.strip().lower()) > 75:
+    standard_names = [""]*len(company_list)
+    # TODO need to do sth more like while(strip_names):
+    # and remove as matches are found
+    for i, cur_name in enumerate(strip_names):
+        # don't match the first name to itself
+        match_idxs = []
+        for j, next_name in enumerate(strip_names[:-1]):
+            
+            #print "cur_name:"
+            #print cur_name
+            #print "next_name.strip().lower()"
+            #print next_name.strip().lower()
+            #print "fuzz.ratio(cur_name, next_name.strip().lower())"
+            #print fuzz.ratio(cur_name, next_name.strip().lower())
+            if fuzz.ratio(cur_name, next_name.strip().lower()) > 60:
                 match_idxs.append(j)
 
         # can improve the make_normalized_name as necessary
-        strip_names[match_idxs] =\
-            make_normalized_name(strip_names[match_idxs])
+        normalized_name = \
+            make_normalized_name([strip_names[idx] for idx in match_idxs])
 
-    return company_list
+        for idx in match_idxs:
+            standard_names[idx] = normalized_name
+
+        # remove the match_idxs entries from strip_names
+        strip_names = [strip_names[i] for i in range(len(strip_names))
+                       if match_idxs.count(i) == 0]
+
+        if not strip_names:
+            print "strip names is appropriately empty"
+
+    return standard_names
 
 
 def make_normalized_name(matches):
@@ -272,9 +291,12 @@ def make_normalized_name(matches):
     Create a single normalized name for all the names for which a
     match has been found.
     """
-    print matches
+    #print matches
     # TODO make a smarter version of this?
-    return matches[0]
+    if matches:
+        return matches[0]
+    else:
+        return None
 
 
 def make_csv_contracts():
